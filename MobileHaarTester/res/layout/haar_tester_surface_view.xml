@@ -1,11 +1,38 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
+
 
     <org.opencv.android.JavaCameraView
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="1000px"
         android:id="@+id/fd_activity_surface_view" />
 
-</LinearLayout>
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="800px"
+        android:layout_height="180px"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true">
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText2"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:hint="Paste URL for classifier here..."
+            android:layout_toLeftOf="@+id/button2" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="get Classifier"
+            android:id="@+id/button2"
+            android:layout_alignTop="@+id/editText2"
+            android:layout_alignParentRight="true" />
+    </RelativeLayout>
+
+
+</RelativeLayout>

@@ -1,4 +1,4 @@
-package org.opencv.samples.facedetect;
+package org.opencv.samples.mobilehaar;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;

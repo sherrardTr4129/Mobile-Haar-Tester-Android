@@ -1,12 +1,20 @@
-package org.opencv.samples.facedetect;
+package org.opencv.samples.mobilehaar;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 
 import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
@@ -15,17 +23,15 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.objdetect.CascadeClassifier;
 
-import android.app.Activity;
-import android.content.Context;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.WindowManager;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class FdActivity extends Activity implements CvCameraViewListener2 {
 
@@ -37,6 +43,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private MenuItem               mscissor;
     private MenuItem               mfork;
     private MenuItem               mItemType;
+    private MenuItem               mMyCascade;
 
     private Mat                    mRgba;
     private Mat                    mGray;
@@ -44,12 +51,14 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private CascadeClassifier      mJavaDetector;
     private DetectionBasedTracker  mNativeDetector;
 
+
     private int                    mDetectorType       = JAVA_DETECTOR;
     private String[]               mDetectorName;
 
     boolean                        scissorIsLoaded     = false;
     boolean                        forkIsLoaded        = false;
     boolean                        firstForkLoaded     = false;
+    boolean                        myCascadeIsLoaded   = false;
 
     private float                  mRelativeFaceSize   = 0.2f;
     private int                    mAbsoluteFaceSize   = 0;
@@ -58,6 +67,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
     private CameraBridgeViewBase   mOpenCvCameraView;
     private String                 currentCascade      = "scissor.xml";
+    private String                 path                = "";
+
 
     public void setCurrentCascade(String CascadeName){ currentCascade = CascadeName; }
 
@@ -99,6 +110,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "called onCreate");
+
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -106,6 +118,23 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
         mOpenCvCameraView.setCvCameraViewListener(this);
+
+
+
+        final EditText edit = (EditText) findViewById(R.id.editText2);
+        final Button button = (Button) findViewById(R.id.button2);
+
+        edit.setTextIsSelectable(true);
+
+
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                path =  downloadXML(edit.getText().toString());
+                edit.setText("");
+
+            }
+        });
+
     }
 
     @Override
@@ -171,6 +200,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
                 scissorIsLoaded = true;
                 forkIsLoaded = false;
+                myCascadeIsLoaded = false;
                 if (mJavaDetector.empty()) {
                     Log.e(TAG, "Failed to load cascade classifier");
                     mJavaDetector = null;
@@ -180,12 +210,13 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
 
             }
-            else if(getCurrentCascade().equals("best_kitchen_fork_cascade.xml") && !forkIsLoaded) {
-                is = getResources().openRawResource(R.raw.best_kitchen_fork_cascade);
-                mCascadeFile = new File(cascadeDir, "best_kitchen_fork_cascade.xml");
+            else if(getCurrentCascade().equals("stop_sign.xml") && !forkIsLoaded) {
+                is = getResources().openRawResource(R.raw.stop_sign);
+                mCascadeFile = new File(cascadeDir, "stop_sign.xml");
                 mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
                 forkIsLoaded = true;
                 scissorIsLoaded = false;
+                myCascadeIsLoaded = false;
                 if (mJavaDetector.empty()) {
                     Log.e(TAG, "Failed to load cascade classifier");
                     mJavaDetector = null;
@@ -194,6 +225,22 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
 
             }
+
+            else if(getCurrentCascade().equals("my_cascade.xml") && !myCascadeIsLoaded && !path.equalsIgnoreCase("")) {
+                Log.i(TAG, "downloaded path: " +  path);
+                mJavaDetector = new CascadeClassifier(path);
+                forkIsLoaded = false;
+                scissorIsLoaded = false;
+                myCascadeIsLoaded = true;
+                if (mJavaDetector.empty()) {
+                    Log.e(TAG, "Failed to load cascade classifier");
+                    mJavaDetector = null;
+                } else
+                    Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
+
+
+            }
+
             FileOutputStream os = new FileOutputStream(mCascadeFile);
 
 
@@ -219,7 +266,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         if (mDetectorType == JAVA_DETECTOR) {
             if (mJavaDetector != null)
                 mJavaDetector.detectMultiScale(mGray, faces, 1.1, 2, 2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
-                        new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
+                        new Size(50, 50), new Size(600,600));
         }
         else if (mDetectorType == NATIVE_DETECTOR) {
             if (mNativeDetector != null)
@@ -240,7 +287,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.i(TAG, "called onCreateOptionsMenu");
         mscissor = menu.add("scissor");
-        mfork = menu.add("fork");
+        mfork = menu.add("stop_sign");
+        mMyCascade = menu.add("my_classifier");
         return true;
     }
 
@@ -250,7 +298,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         if (item == mscissor)
             setCurrentCascade("scissor.xml");
         else if (item == mfork)
-            setCurrentCascade("best_kitchen_fork_cascade.xml");
+            setCurrentCascade("stop_sign.xml");
+        else if(item == mMyCascade)
+            setCurrentCascade("my_cascade.xml");
         else if (item == mItemType) {
             int tmpDetectorType = (mDetectorType + 1) % mDetectorName.length;
             item.setTitle(mDetectorName[tmpDetectorType]);
@@ -258,6 +308,69 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         }
         return true;
     }
+
+
+
+
+    public String downloadXML(String URL){
+        try {
+
+            //set the download URL, a url that points to a file on the internet
+
+            URL url = new URL(URL);
+
+            //create the new connection
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+            //and connect!
+            urlConnection.connect();
+
+            //set the path where we want to save the file
+            //in this case, going to save it on the root directory of the
+            //sd card.
+            File file = new File(getFilesDir(), "data.xml");
+            //create a new file, specifying the path, and the filename
+            //which we want to save the file as.
+
+            path = file.getAbsolutePath();
+            //this will be used to write the downloaded data into the file we created
+            FileOutputStream fileOutput = new FileOutputStream(file);
+
+            //this will be used in reading the data from the internet
+            InputStream inputStream = urlConnection.getInputStream();
+
+            //this is the total size of the file
+            int totalSize = urlConnection.getContentLength();
+
+
+            //variable to store total downloaded bytes
+            int downloadedSize = 0;
+
+            //create a buffer...
+            byte[] buffer = new byte[1024];
+            int bufferLength = 0; //used to store a temporary size of the buffer
+
+            //now, read through the input buffer and write the contents to the file
+            while ( (bufferLength = inputStream.read(buffer)) > 0 ) {
+                //add the data in the buffer to the file in the file output stream (the file on the sd card
+                fileOutput.write(buffer, 0, bufferLength);
+                //add up the size so we know how much is downloaded
+                downloadedSize += bufferLength;
+
+            }
+            //close the output stream when done
+            fileOutput.close();
+            //catch some possible errors...
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return path;
+
+
+    }
+
 
     private void setMinFaceSize(float faceSize) {
         mRelativeFaceSize = faceSize;
