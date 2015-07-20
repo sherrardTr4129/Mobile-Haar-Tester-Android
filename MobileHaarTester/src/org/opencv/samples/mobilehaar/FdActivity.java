@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -188,6 +189,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     mJavaDetector = null;
                 } else
                     Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
+                Toast.makeText(getApplicationContext(), "Loaded default classifier", Toast.LENGTH_SHORT).show();
             }
 
 
@@ -206,6 +208,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     mJavaDetector = null;
                 } else
                     Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
+                Toast.makeText(getApplicationContext(), "Loaded scissor classifier", Toast.LENGTH_SHORT).show();
+
+
 
 
 
@@ -222,6 +227,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     mJavaDetector = null;
                 } else
                     Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
+                Toast.makeText(getApplicationContext(), "Loaded stop sign classifier", Toast.LENGTH_SHORT).show();
+
 
 
             }
@@ -232,6 +239,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     mJavaDetector = new CascadeClassifier(path);
                 }
                 catch (Exception e){
+                    Toast.makeText(getApplicationContext(), "plain text file URLs only, please.", Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
                 forkIsLoaded = false;
@@ -239,9 +247,12 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 myCascadeIsLoaded = true;
                 if (mJavaDetector.empty()) {
                     Log.e(TAG, "Failed to load cascade classifier");
+                    Toast.makeText(getApplicationContext(), "Downloaded classifier was empty.", Toast.LENGTH_SHORT).show();
                     mJavaDetector = null;
                 } else
                     Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
+                Toast.makeText(getApplicationContext(), "Downloaded custom classifier", Toast.LENGTH_SHORT).show();
+
 
 
             }
