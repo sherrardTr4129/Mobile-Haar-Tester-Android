@@ -130,7 +130,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Downloading classifier...", Toast.LENGTH_SHORT).show();
                 path =  downloadXML(edit.getText().toString());
+                Toast.makeText(getApplicationContext(), "Classifier downloaded!", Toast.LENGTH_SHORT).show();
                 edit.setText("");
 
             }
@@ -251,7 +253,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     mJavaDetector = null;
                 } else
                     Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
-                Toast.makeText(getApplicationContext(), "Downloaded custom classifier", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "custom classifier loaded.", Toast.LENGTH_SHORT).show();
 
 
 
