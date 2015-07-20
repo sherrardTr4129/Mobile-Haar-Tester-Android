@@ -228,7 +228,12 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
             else if(getCurrentCascade().equals("my_cascade.xml") && !myCascadeIsLoaded && !path.equalsIgnoreCase("")) {
                 Log.i(TAG, "downloaded path: " +  path);
-                mJavaDetector = new CascadeClassifier(path);
+                try {
+                    mJavaDetector = new CascadeClassifier(path);
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
                 forkIsLoaded = false;
                 scissorIsLoaded = false;
                 myCascadeIsLoaded = true;
