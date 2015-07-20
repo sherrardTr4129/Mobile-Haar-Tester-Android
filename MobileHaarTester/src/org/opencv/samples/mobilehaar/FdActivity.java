@@ -126,10 +126,12 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
         edit.setTextIsSelectable(true);
 
-
+        //set up button callback
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                //try to download plain text XML cascade file from URL
                 path =  downloadXML(edit.getText().toString());
+                //reset text to a empty string.
                 edit.setText("");
 
             }
@@ -176,7 +178,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         MatOfRect faces = new MatOfRect();
 
         try {
-            // load cascade file from application resources
+            // load default cascade file from application resources
             File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
             mCascadeFile = new File(cascadeDir, "scissor.xml");
             is = getResources().openRawResource(R.raw.scissor);
@@ -193,7 +195,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
             firstForkLoaded = true;
 
-
+            //load scissor cascade
             if(getCurrentCascade().equals("scissor.xml") && !scissorIsLoaded) {
                 is = getResources().openRawResource(R.raw.scissor);
                 mCascadeFile = new File(cascadeDir, "scissor.xml");
@@ -210,6 +212,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
 
             }
+
+            // load stop sign cascade
             else if(getCurrentCascade().equals("stop_sign.xml") && !forkIsLoaded) {
                 is = getResources().openRawResource(R.raw.stop_sign);
                 mCascadeFile = new File(cascadeDir, "stop_sign.xml");
@@ -225,7 +229,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
 
             }
-
+            //load custom downloaded cascade from path.
             else if(getCurrentCascade().equals("my_cascade.xml") && !myCascadeIsLoaded && !path.equalsIgnoreCase("")) {
                 Log.i(TAG, "downloaded path: " +  path);
                 try {
@@ -316,7 +320,11 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
 
 
-
+    /*
+     * Downlaods an plain text XML file from a URL.
+     * params: a String URL to download the file from
+     * returns: the path that the XML cascade file was saved to.
+     */
     public String downloadXML(String URL){
         try {
 
